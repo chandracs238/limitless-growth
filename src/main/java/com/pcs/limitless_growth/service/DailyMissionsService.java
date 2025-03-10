@@ -30,6 +30,8 @@ public class DailyMissionsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        DailyMissions dailyMissions = dailyMissionsRepository.findByDayNumber(dayNumber);
+
         UserDailyMissionsProgress progress = userDailyMissionsProgressRepository
                 .findByUserAndDayNumber(user, dayNumber).orElseThrow(() -> new RuntimeException("Missions not found!"));
 
@@ -37,7 +39,11 @@ public class DailyMissionsService {
             throw new RuntimeException("Mission already completed");
         }
 
+        user.setExpPoints(user.getExpPoints() + dailyMissions.getRewardPoints());
+        userRepository.save(user);
+
         progress.setCompleted(true);
+        progress.setCompletedAt(LocalDate.now());
         return userDailyMissionsProgressRepository.save(progress);
     }
 

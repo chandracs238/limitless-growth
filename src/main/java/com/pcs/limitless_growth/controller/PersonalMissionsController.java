@@ -60,14 +60,7 @@ public class PersonalMissionsController {
             @PathVariable Long userId) {
         User user = findUser(userId);
 
-        PersonalMissions personalMission = new PersonalMissions();
-        personalMission.setStatus(request.getStatus());
-        personalMission.setName(request.getName());
-        personalMission.setStartDate(request.getStartDate());
-        personalMission.setEndDate(request.getEndDate());
-        personalMission.setDifficulty(request.getDifficulty());
-
-        PersonalMissions savedMission = personalMissionsService.addNewMission(personalMission, user);
+        PersonalMissions savedMission = personalMissionsService.addNewMission(request, user);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{missionId}")

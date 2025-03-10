@@ -1,6 +1,5 @@
 package com.pcs.limitless_growth.controller;
 
-import com.pcs.limitless_growth.entities.User;
 import com.pcs.limitless_growth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +23,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestParam String username, @RequestParam String email, @RequestParam String password){
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(password);
-        userService.registerUser(user);
+        userService.registerUser(username, email, password);
         return ResponseEntity.ok("Register Successfully");
     }
 

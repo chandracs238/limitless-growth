@@ -6,6 +6,7 @@ import com.pcs.limitless_growth.entities.Status;
 import com.pcs.limitless_growth.entities.User;
 import com.pcs.limitless_growth.exception.ResourceNotFoundException;
 import com.pcs.limitless_growth.repository.PersonalMissionsRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,16 @@ public class PersonalMissionsService {
         this.personalMissionsRepository = personalMissionsRepository;
     }
 
-    public PersonalMissions addNewMission(PersonalMissions personalMissions, User user) {
-        personalMissions.setUser(user);
-        personalMissions.setRewardPoints(PersonalMissions.calculateRewardPoints(personalMissions.getDifficulty()));
-        return personalMissionsRepository.save(personalMissions);
+    public PersonalMissions addNewMission(@Valid PersonalMissionRequest request, User user) {
+        PersonalMissions personalMission = new PersonalMissions();
+        personalMission.setStatus(request.getStatus());
+        personalMission.setName(request.getName());
+        personalMission.setStartDate(request.getStartDate());
+        personalMission.setEndDate(request.getEndDate());
+        personalMission.setDifficulty(request.getDifficulty());
+        personalMission.setUser(user);
+        personalMission.setRewardPoints(PersonalMissions.calculateRewardPoints(personalMission.getDifficulty()));
+        return personalMissionsRepository.save(personalMission);
     }
 
     public List<PersonalMissions> getAllPersonalMissions(User user) {

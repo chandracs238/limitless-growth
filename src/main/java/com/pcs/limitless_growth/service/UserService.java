@@ -12,7 +12,11 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public void registerUser(User user){
+    public void registerUser(String username, String email, String password){
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password);
         user.setTier(Tier.E);
         user.setExpPoints(0L);
         userRepository.save(user);
