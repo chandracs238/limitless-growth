@@ -1,35 +1,28 @@
 package com.pcs.limitless_growth.controller;
 
 import com.pcs.limitless_growth.entities.DailyMissions;
+import com.pcs.limitless_growth.entities.UserDailyMissionsProgress;
 import com.pcs.limitless_growth.service.DailyMissionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/users/{userId}/dailyMissions")
 public class DailyMissionsController {
 
     @Autowired
     private DailyMissionsService dailyMissionsService;
 
-    @GetMapping("/dailyMissions")
-    public List<DailyMissions> getAllDailyMissions(){
-        return dailyMissionsService.getAllDailyMissions();
+
+    @GetMapping
+    public ResponseEntity<DailyMissions> getDailyMissions(@PathVariable Long userId){
+        return ResponseEntity.ok(dailyMissionsService.getTodaysMission(userId));
     }
 
-    @GetMapping("/dailyMissions/{id}")
-    public DailyMissions getDailyMissionsById(@PathVariable Long id){
-        return dailyMissionsService.getDailyMissionsById(id);
+    @PostMapping("/complete/{dayNumber}")
+    public ResponseEntity<UserDailyMissionsProgress> completeQuest(@PathVariable Long userId, @PathVariable Integer dayNumber){
+        return ResponseEntity.ok(dailyMissionsService.completeDailyMissions(userId, dayNumber));
     }
 
-    @PostMapping("/dailyMissions/{dailyMissionsId}/complete/{userId}")
-    public ResponseEntity<String> completeQuest(@PathVariable Long userId, @PathVariable Long dailyMissionsId){
-        String result = dailyMissionsService.completeDailyMissions(userId, dailyMissionsId);
-        return ResponseEntity.ok(result);
-    }
 }

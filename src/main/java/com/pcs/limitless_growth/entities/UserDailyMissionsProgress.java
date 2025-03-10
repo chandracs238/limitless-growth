@@ -19,14 +19,11 @@ public class UserDailyMissionsProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     private User user;
-
-    @ManyToOne
-    private DailyMissions dailyMissions;
-
+    private Integer dayNumber;
     private boolean completed;
-
+    private LocalDate assignedDate;
     private LocalDate completedAt;
+
 }
