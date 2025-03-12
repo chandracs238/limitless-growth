@@ -5,7 +5,6 @@ import com.pcs.limitless_growth.dto.PersonalMissionResponse;
 import com.pcs.limitless_growth.entities.PersonalMissions;
 import com.pcs.limitless_growth.entities.Status;
 import com.pcs.limitless_growth.entities.User;
-import com.pcs.limitless_growth.exception.ResourceNotFoundException;
 import com.pcs.limitless_growth.repository.UserRepository;
 import com.pcs.limitless_growth.service.PersonalMissionsService;
 import jakarta.validation.Valid;
@@ -33,7 +32,7 @@ public class PersonalMissionsController {
 
     private User findUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with ID " + userId + " not found."));
+                .orElseThrow(() -> new RuntimeException("User with ID " + userId + " not found."));
     }
 
     @GetMapping

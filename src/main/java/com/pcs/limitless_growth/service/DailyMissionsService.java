@@ -1,8 +1,10 @@
 package com.pcs.limitless_growth.service;
 
+import com.pcs.limitless_growth.dto.DailyMissionsProgressResponse;
 import com.pcs.limitless_growth.entities.DailyMissions;
 import com.pcs.limitless_growth.entities.User;
 import com.pcs.limitless_growth.entities.UserDailyMissionsProgress;
+import com.pcs.limitless_growth.exception.NoMissionsAvailableException;
 import com.pcs.limitless_growth.repository.DailyMissionsRepository;
 import com.pcs.limitless_growth.repository.UserDailyMissionsProgressRepository;
 import com.pcs.limitless_growth.repository.UserRepository;
@@ -10,7 +12,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 public class DailyMissionsService {
@@ -19,23 +20,23 @@ public class DailyMissionsService {
     private final UserDailyMissionsProgressRepository userDailyMissionsProgressRepository;
     private final UserRepository userRepository;
 
-    public DailyMissionsService(DailyMissionsRepository dailyMissionsRepository, UserDailyMissionsProgressRepository userDailyMissionsProgressRepository, UserRepository userRepository){
+    public DailyMissionsService(DailyMissionsRepository dailyMissionsRepository, UserDailyMissionsProgressRepository userDailyMissionsProgressRepository, UserRepository userRepository) {
         this.dailyMissionsRepository = dailyMissionsRepository;
         this.userDailyMissionsProgressRepository = userDailyMissionsProgressRepository;
         this.userRepository = userRepository;
     }
 
     @Transactional
-    public UserDailyMissionsProgress completeDailyMissions(Long userId, Integer dayNumber){
+    public DailyMissionsProgressResponse completeDailyMissions(Long userId, Integer dayNumber) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         DailyMissions dailyMissions = dailyMissionsRepository.findByDayNumber(dayNumber);
 
         UserDailyMissionsProgress progress = userDailyMissionsProgressRepository
-                .findByUserAndDayNumber(user, dayNumber).orElseThrow(() -> new RuntimeException("Missions not found!"));
+                .findByUserAndDayNumber(user, dayNumber).orElseThrow(() -> new NoMissionsAvailableException("Mission not found"));
 
-        if (progress.isCompleted()){
+        if (progress.isCompleted()) {
             throw new RuntimeException("Mission already completed");
         }
 
@@ -44,40 +45,37 @@ public class DailyMissionsService {
 
         progress.setCompleted(true);
         progress.setCompletedAt(LocalDate.now());
-        return userDailyMissionsProgressRepository.save(progress);
+        userDailyMissionsProgressRepository.save(progress);
+
+        return new DailyMissionsProgressResponse(progress);
     }
 
     @Transactional
-    public DailyMissions getTodaysMission(Long userId){
+    public DailyMissions getTodaysMission(Long userId) {
         LocalDate today = LocalDate.now();
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Optional<UserDailyMissionsProgress> existingMission =
-                userDailyMissionsProgressRepository.findByUserAndAssignedDate(user, today);
+        // Check if today's mission is already assigned
+        return userDailyMissionsProgressRepository.findByUserAndAssignedDate(user, today)
+                .map(progress -> dailyMissionsRepository.findByDayNumber(progress.getDayNumber()))
+                .orElseGet(() -> assignNewMission(user, today));
+    }
 
-        if (existingMission.isPresent()){
-            return dailyMissionsRepository.findByDayNumber(existingMission.get().getDayNumber());
-        }
-
-        Optional<UserDailyMissionsProgress> lastCompleted =
-                userDailyMissionsProgressRepository.findTopByUserAndCompletedOrderByDayNumberDesc(user, true);
-
-        Integer nextDay = lastCompleted.map(UserDailyMissionsProgress::getDayNumber).orElse(0) + 1;
+    private DailyMissions assignNewMission(User user, LocalDate today) {
+        // Get the last completed mission and determine the next day's mission
+        Integer nextDay = userDailyMissionsProgressRepository.findTopByUserAndCompletedOrderByDayNumberDesc(user, true)
+                .map(UserDailyMissionsProgress::getDayNumber)
+                .orElse(0) + 1;
 
         DailyMissions dailyMissions = dailyMissionsRepository.findByDayNumber(nextDay);
-
-        if (dailyMissions == null){
-            throw new RuntimeException("No new missions available");
+        if (dailyMissions == null) {
+            throw new NoMissionsAvailableException("No new missions available for day " + nextDay);
         }
 
-        UserDailyMissionsProgress progress = new UserDailyMissionsProgress();
-        progress.setUser(user);
-        progress.setDayNumber(nextDay);
-        progress.setCompleted(false);
-        progress.setAssignedDate(today);
-        userDailyMissionsProgressRepository.save(progress);
+        // Save the new mission assignment
+        userDailyMissionsProgressRepository.save(new UserDailyMissionsProgress(null, user, nextDay, false, today, null));
 
         return dailyMissions;
     }
-
 }

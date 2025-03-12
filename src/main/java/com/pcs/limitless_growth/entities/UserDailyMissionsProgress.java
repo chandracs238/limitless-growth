@@ -1,10 +1,7 @@
 package com.pcs.limitless_growth.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -25,5 +22,4 @@ public class UserDailyMissionsProgress {
     private boolean completed;
     private LocalDate assignedDate;
     private LocalDate completedAt;
-
 }

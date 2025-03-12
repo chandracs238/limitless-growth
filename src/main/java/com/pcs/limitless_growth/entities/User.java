@@ -25,7 +25,6 @@ public class User {
     private String email;
     @Column(nullable = false)
     private String password;
-
     private Tier tier;
     private Long expPoints;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

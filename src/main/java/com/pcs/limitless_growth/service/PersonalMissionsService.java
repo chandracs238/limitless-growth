@@ -4,8 +4,9 @@ import com.pcs.limitless_growth.dto.PersonalMissionRequest;
 import com.pcs.limitless_growth.entities.PersonalMissions;
 import com.pcs.limitless_growth.entities.Status;
 import com.pcs.limitless_growth.entities.User;
-import com.pcs.limitless_growth.exception.ResourceNotFoundException;
+import com.pcs.limitless_growth.exception.NoMissionsAvailableException;
 import com.pcs.limitless_growth.repository.PersonalMissionsRepository;
+import com.pcs.limitless_growth.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ import java.util.List;
 public class PersonalMissionsService {
 
     private final PersonalMissionsRepository personalMissionsRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public PersonalMissionsService(PersonalMissionsRepository personalMissionsRepository) {
+    public PersonalMissionsService(PersonalMissionsRepository personalMissionsRepository, UserRepository userRepository) {
         this.personalMissionsRepository = personalMissionsRepository;
+        this.userRepository = userRepository;
     }
 
     public PersonalMissions addNewMission(@Valid PersonalMissionRequest request, User user) {
@@ -41,7 +44,7 @@ public class PersonalMissionsService {
 
     public PersonalMissions getPersonalMissionById(Long id) {
         return personalMissionsRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Mission with ID " + id + " not found."));
+                .orElseThrow(() -> new NoMissionsAvailableException("Mission with ID " + id + " not found."));
     }
 
     public PersonalMissions updatePersonalMissionById(Long id, PersonalMissionRequest updatedMission, User user) throws AccessDeniedException {
@@ -67,6 +70,10 @@ public class PersonalMissionsService {
             throw new AccessDeniedException("You do not have permission to modify this mission.");
         }
         existingMission.setStatus(status);
+        if (status.equals(Status.COMPLETED)){
+            user.setExpPoints(user.getExpPoints() + existingMission.getRewardPoints());
+            userRepository.save(user);
+        }
         return personalMissionsRepository.save(existingMission);
     }
 

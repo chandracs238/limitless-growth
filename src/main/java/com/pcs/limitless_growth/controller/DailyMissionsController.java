@@ -1,7 +1,7 @@
 package com.pcs.limitless_growth.controller;
 
+import com.pcs.limitless_growth.dto.DailyMissionsProgressResponse;
 import com.pcs.limitless_growth.entities.DailyMissions;
-import com.pcs.limitless_growth.entities.UserDailyMissionsProgress;
 import com.pcs.limitless_growth.service.DailyMissionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class DailyMissionsController {
     }
 
     @PostMapping("/complete/{dayNumber}")
-    public ResponseEntity<UserDailyMissionsProgress> completeQuest(@PathVariable Long userId, @PathVariable Integer dayNumber){
+    public ResponseEntity<DailyMissionsProgressResponse> completeMission(@PathVariable Long userId, @PathVariable Integer dayNumber){
         return ResponseEntity.ok(dailyMissionsService.completeDailyMissions(userId, dayNumber));
     }
 

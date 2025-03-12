@@ -39,19 +39,19 @@ public class DailyMissionsDataLoader implements CommandLineRunner {
     }
 
     private Tier determineDifficulty(int day) {
-        if (day <= 20) return Tier.E;
-        else if (day <= 40) return Tier.D;
-        else if (day <= 70) return Tier.C;
-        else if (day <= 90) return Tier.B;
-        else return Tier.A;
+        if (day <= 20) return Tier.C;
+        else if (day <= 40) return Tier.B;
+        else if (day <= 70) return Tier.A;
+        else if (day <= 90) return Tier.S;
+        else return Tier.SS;
     }
 
     private Integer generateRewardPoints(Tier tier){
-        if (tier == Tier.E) return 10;
-        else if (tier == Tier.D) return 5;
-        else if (tier == Tier.C) return 4;
-        else if (tier == Tier.B) return 3;
-        else if (tier == Tier.A) return 2;
+        if (tier == Tier.C) return 3;
+        else if (tier == Tier.B) return 4;
+        else if (tier == Tier.A) return 5;
+        else if (tier == Tier.S) return 10;
+        else if (tier == Tier.SS) return 20;
         return 1;
     }
 }
