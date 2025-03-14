@@ -43,6 +43,6 @@ public class DailyMissionsIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dayNumber").isNumber());
 
-        assertTrue(d);
+        assertTrue(d); 
     }
 }
