@@ -70,7 +70,7 @@ public class DailyMissionsControllerTest {
                 .thenThrow(new NoMissionsAvailableException("Mission not found"));
 
         mockMvc.perform(post("/users/1/dailyMissions/complete/5"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
 }
