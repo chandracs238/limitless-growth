@@ -73,7 +73,4 @@ public class DailyMissionsControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    void shouldReturn
-
 }
