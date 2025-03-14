@@ -1,6 +1,7 @@
 package com.pcs.limitless_growth.integration;
 
 
+import com.pcs.limitless_growth.entities.DailyMissions;
 import com.pcs.limitless_growth.entities.User;
 import com.pcs.limitless_growth.repository.DailyMissionsRepository;
 import com.pcs.limitless_growth.repository.UserRepository;
@@ -27,7 +28,7 @@ public class DailyMissionsIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private DailyMissions
+    private DailyMissions dailyMissions;
 
     @Autowired
     private UserRepository userRepository;
@@ -42,7 +43,5 @@ public class DailyMissionsIntegrationTest {
         mockMvc.perform(get("/users/1/dailyMissions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dayNumber").isNumber());
-
-        assertTrue(d); 
     }
 }
