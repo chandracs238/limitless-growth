@@ -4,15 +4,16 @@ import com.pcs.limitless_growth.dto.DailyMissionsProgressResponse;
 import com.pcs.limitless_growth.entities.DailyMissions;
 import com.pcs.limitless_growth.entities.User;
 import com.pcs.limitless_growth.entities.UserDailyMissionsProgress;
+import com.pcs.limitless_growth.exception.NoMissionsAvailableException;
 import com.pcs.limitless_growth.repository.DailyMissionsRepository;
 import com.pcs.limitless_growth.repository.UserDailyMissionsProgressRepository;
 import com.pcs.limitless_growth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -142,11 +143,61 @@ public class DailyMissionsServiceTest {
     }
 
     @Test
-    void testGetTodaysMission_shouldStartFromDayOneIfNoMissionsCompleted(){}
+    @DisplayName("Should start form Day 1 if no missions have been completed")
+    void testGetTodaysMission_shouldStartFromDayOneIfNoMissionsCompleted(){
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userDailyMissionsProgressRepository.findByUserAndAssignedDate(user, LocalDate.now()))
+                .thenReturn(Optional.empty());
+        when(userDailyMissionsProgressRepository.findTopByUserAndCompletedOrderByDayNumberDesc(user, true))
+                .thenReturn(Optional.empty());
+        when(dailyMissionsRepository.findByDayNumber(1)).thenReturn(dailyMissions);
+
+        DailyMissions result = dailyMissionsService.getTodaysMission(1L);
+
+        assertNotNull(result);
+        assertEquals(1, result.getDayNumber());
+        verify(dailyMissionsRepository, times(1)).findByDayNumber(1);
+        verify(userDailyMissionsProgressRepository, times(1)).save(any());
+    }
 
     @Test
-    void testGetTodaysMission_shouldThrowExceptionIfUserNotFound(){}
+    void testGetTodaysMission_shouldThrowExceptionIfUserNotFound(){
+        when(userRepository.findById(100L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> dailyMissionsService.getTodaysMission(100L));
+
+        assertThat(exception.getMessage()).isEqualTo("User not found");
+    }
 
     @Test
-    void testGetTodaysMission_shouldThrowExceptionIfNoNewMissionsAreAvailable(){}
+    void testGetTodaysMission_shouldThrowExceptionIfNoNewMissionsAreAvailable(){
+        DailyMissions dailyMissions1 = new DailyMissions();
+        dailyMissions1.setDayNumber(100);
+        dailyMissions1.setTitle("Learn Java");
+
+        UserDailyMissionsProgress userDailyMissionsProgress1 = new UserDailyMissionsProgress();
+        userDailyMissionsProgress1.setUser(user);
+        userDailyMissionsProgress1.setDayNumber(100);
+        userDailyMissionsProgress1.setCompleted(true);
+
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userDailyMissionsProgressRepository.findByUserAndAssignedDate(user, LocalDate.now()))
+                .thenReturn(Optional.empty());
+        when(userDailyMissionsProgressRepository.findTopByUserAndCompletedOrderByDayNumberDesc(user, true))
+                .thenReturn(Optional.of(userDailyMissionsProgress1));
+        when(dailyMissionsRepository.findByDayNumber(101))
+                .thenThrow(new NoMissionsAvailableException("No new missions available for day 101"));
+
+        NoMissionsAvailableException exception = assertThrows(
+                NoMissionsAvailableException.class,
+                () -> dailyMissionsService.getTodaysMission(1L)
+        );
+
+        assertEquals("No new missions available for day 101", exception.getMessage());
+
+        verify(dailyMissionsRepository, times(1)).findByDayNumber(101);
+
+    }
 }
