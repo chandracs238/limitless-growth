@@ -47,7 +47,7 @@ public class PersonalMissionsService {
                 .orElseThrow(() -> new NoMissionsAvailableException("Mission with ID " + id + " not found."));
     }
 
-    public PersonalMissions updatePersonalMissionById(Long id, PersonalMissionRequest updatedMission, User user) throws AccessDeniedException {
+    public void updatePersonalMissionById(Long id, PersonalMissionRequest updatedMission, User user) throws AccessDeniedException {
         PersonalMissions existingMission = getPersonalMissionById(id);
 
         if (!existingMission.getUser().equals(user)) {
@@ -61,10 +61,10 @@ public class PersonalMissionsService {
         existingMission.setStatus(updatedMission.getStatus());
         existingMission.setRewardPoints(PersonalMissions.calculateRewardPoints(updatedMission.getDifficulty()));
 
-        return personalMissionsRepository.save(existingMission);
+        personalMissionsRepository.save(existingMission);
     }
 
-    public PersonalMissions updateMissionStatus(Long missionId, Status status, User user) throws AccessDeniedException {
+    public void updateMissionStatus(Long missionId, Status status, User user) throws AccessDeniedException {
         PersonalMissions existingMission = getPersonalMissionById(missionId);
         if (!existingMission.getUser().equals(user)) {
             throw new AccessDeniedException("You do not have permission to modify this mission.");
@@ -74,7 +74,7 @@ public class PersonalMissionsService {
             user.setExpPoints(user.getExpPoints() + existingMission.getRewardPoints());
             userRepository.save(user);
         }
-        return personalMissionsRepository.save(existingMission);
+        personalMissionsRepository.save(existingMission);
     }
 
     public void deleteMission(Long missionId, User user) throws AccessDeniedException {
