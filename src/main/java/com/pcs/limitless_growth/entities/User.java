@@ -1,5 +1,6 @@
 package com.pcs.limitless_growth.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,8 +39,10 @@ public class User {
     private Long expPoints;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<UserDailyMissionsProgress> dailyMissionsProgresses;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<PersonalMissions> personalMissions;
 }

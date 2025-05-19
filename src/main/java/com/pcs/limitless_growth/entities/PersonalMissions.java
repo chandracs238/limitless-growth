@@ -1,5 +1,6 @@
 package com.pcs.limitless_growth.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class PersonalMissions {
     private Integer rewardPoints;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     public static Integer calculateRewardPoints(Tier tier) {
