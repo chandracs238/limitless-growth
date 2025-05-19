@@ -19,16 +19,27 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true, nullable = false)
     private String username;
+
     @Column(unique = true, nullable = false)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     private Tier tier;
+
     private Long expPoints;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserDailyMissionsProgress> dailyMissionsProgresses;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PersonalMissions> personalMissions;
 }
